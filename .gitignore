@@ -1,0 +1,6 @@
+.vscode
+.mxproject
+*.ioc
+compile_commands.json
+.cache
+build
