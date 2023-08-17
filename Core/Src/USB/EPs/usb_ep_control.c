@@ -1,11 +1,11 @@
 #include "usb_ep_control.h"
 #include "usb_ep.h"
+#include "usb.h"
+#include <stdint.h>
 
-static USB_EpControlStage stage = STANDBY; 
-
-static void  EPControl_SendStatus(USB_EP *this, uint_fast8_t status)
+static void  EPControl_SendStatus(USB_EP* this, ErrorStatus status)
 {
-	if (status) {
+	if (status == SUCCESS) {
 		this->TransmitPacket(this, NULL, 0);
 	} else {
 		this->TransmitStall(this);
@@ -14,54 +14,22 @@ static void  EPControl_SendStatus(USB_EP *this, uint_fast8_t status)
 	return;
 }
 
-static void EPControl_Handshake(USB_EP* this)
+static void EPContol_SetupStage(USB_EP* this)
 {
-	
-	return;
-}
-
-static void EPControl_DataIn(USB_EP* this) 
-{ 
-	return;
-}
-
-static void EPControl_DataOut(USB_EP* this)
-{
-	return;
-}
-
-void EPControl_OnReceive(USB_EP* this, uint_fast8_t setup)
-{
-    if (!this) {
-        return;
+	if (!this) {
+		return;
 	}
-
-	switch (stage) {
-		case STANDBY:
-			break;
-		case HANDSHAKE:
-			EPControl_Handshake(this);
-			break;
-		case RECV_SETUP:
-			EPControl_DataIn(this);
-			break;
-		case SEND_SETUP:
-			EPControl_DataOut(this);
-		break;
-	}
-
-    // Extract the parameters of the request uint8_t bmRequestType = static_cast < uint8_t > ( EP0_BUF [ 0 ] & 0xFF );		
 
     uint8_t rxData[sizeof(USB_DevRequest)];
     this->ReadBuffer(this, rxData, sizeof(USB_DevRequest));
 
     USB_DevRequest* req = (USB_DevRequest*)(rxData);
 
-    if(req->bmRequestType == 0x80 && req->bRequest == 0x6) {
-        uint8_t type = (req->wValue >> 8);
-        uint8_t index = req->wValue;
+	uint8_t type = (req->wValue >> 8);
+	uint8_t index = req->wValue;
 
-        if (type == 1 && index == 0 && req->wIndex == 0) {
+    if (req->bmRequestType == 0x80 && req->bRequest == GET_DESCRIPTOR) {
+        if (type == DEVICE && index == 0 && req->wIndex == 0) {
             uint8_t txData[sizeof(devDesc)];
 
             txData[0] = devDesc.bLength;
@@ -86,6 +54,45 @@ void EPControl_OnReceive(USB_EP* this, uint_fast8_t setup)
             this->TransmitPacket(this, txData, sizeof(txData)); 
         }
     }
+
+	if (req->bmRequestType == 0x00 && req->bRequest == SET_ADDRESS) {
+		__BKPT();
+
+		this->address = (uint8_t)(req->wValue & 0x7F);
+		EPControl_SendStatus(this, SUCCESS);
+	}
+}
+
+void EPControl_StatusStage(USB_EP* this)
+{
+	if (this->address) {
+		USB_SETADDRESS(this->address);
+		__BKPT();
+
+		this->address = 0;
+	}
+	this->ReceivePacket(this, this->rxBufferLen);
+}
+
+void EPControl_OnReceive(USB_EP* this)
+{
+	__BKPT();
+
+    if (!this) {
+        return;
+	}
+
+	uint_fast8_t isSetup = this->epr && USB_EP_SETUP;
+	
+	__BKPT();
+
+	if (isSetup) {
+		EPContol_SetupStage(this);
+	} else {
+		__BKPT();
+
+		EPControl_StatusStage(this);
+	}
 }
 
 void EPControl_OnReset(USB_EP* this)

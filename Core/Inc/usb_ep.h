@@ -28,7 +28,7 @@ typedef struct USB_EP_s {
 	void (*ReceivePacket)(struct USB_EP_s* this, size_t length);
 	void (*ReadBuffer)(struct USB_EP_s* this, uint8_t* buffer, size_t length);
 	void (*OnTransmit)(struct USB_EP_s* this);
-	void (*OnReceive)(struct USB_EP_s* this, uint_fast8_t setup);
+	void (*OnReceive)(struct USB_EP_s* this);
 	void (*OnReset)(struct USB_EP_s* this);
 
 	uint16_t*  	epr;

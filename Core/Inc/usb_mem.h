@@ -33,33 +33,6 @@ typedef struct EP_BufDesc_s {
 	uint16_t Padding4; 
 } EP_BufDesc;
 
-// Device descriptor
-typedef struct USB_DevDesc_s {
-    uint8_t bLength;
-    uint8_t bDescriptorType;
-    uint16_t bcdUSB;
-    uint8_t bDeviceClass;
-    uint8_t bDeviceSubClass;
-    uint8_t bDeviceProtocol;
-    uint8_t bMaxPacketSize0;
-    uint16_t idVendor;
-    uint16_t idProduct;
-    uint16_t bcdDevice;
-    uint8_t iManufacturer;
-    uint8_t iProduct;
-    uint8_t iSerialNumber;
-    uint8_t bNumConfigurations;
-} USB_DevDesc;
-
-// Request issued by a SETUP from host
-typedef struct USB_DevRequest_s {
-    uint8_t bmRequestType;
-    uint8_t bRequest;
-    uint16_t wValue;
-    uint16_t wIndex;
-    uint16_t wLength;
-} USB_DevRequest;
-
 /*
     USB buffer addresses are 32 bits aligned
     due to APB bridge only able to access 32bits words,

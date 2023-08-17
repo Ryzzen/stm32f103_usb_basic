@@ -5,8 +5,6 @@
 extern "C" {
 #endif
 
-#include "usb_ep.h"
-
 typedef enum USB_EpControlStage_e {
 	STANDBY,
 	HANDSHAKE,

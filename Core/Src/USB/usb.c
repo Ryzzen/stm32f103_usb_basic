@@ -1,4 +1,6 @@
 #include "usb.h"
+#include "usb_def.h"
+#include <stdint.h>
 
 static USB_EP endpoints[EP_TYPENUMBERS];
 
@@ -82,7 +84,7 @@ static void USB_CTRInterruptHandler()
 
     if (dir && (epr & USB_EP0R_CTR_RX)) {
 		// Receive packet... 
-        endpoints[ep].OnReceive(&endpoints[ep], 0);
+        endpoints[ep].OnReceive(&endpoints[ep]);
 	}
 
     if (epr & USB_EP0R_CTR_TX) {

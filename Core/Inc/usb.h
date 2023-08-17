@@ -7,7 +7,10 @@ extern "C" {
 
 #include "stm32f1xx.h"
 #include "usb_mem.h"
+#include "usb_def.h"
 #include "usb_ep.h"
+
+#define USB_SETADDRESS(address) (USB->DADDR = (uint16_t)(USB_DADDR_EF | address))
 
 void USB_Init();
 void USB_Connect();

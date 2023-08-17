@@ -80,7 +80,7 @@ void EPn_OnTransmit(USB_EP* this)
     EPn_ReceivePacket(this, this->rxBufferLen);
 }
 
-void EPn_OnReceive(USB_EP* this, uint_fast8_t setup)
+void EPn_OnReceive(USB_EP* this)
 {
     return;
 }
