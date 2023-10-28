@@ -3,17 +3,6 @@
 #include "usb.h"
 #include <stdint.h>
 
-static void  EPControl_SendStatus(USB_EP* this, ErrorStatus status)
-{
-	if (status == SUCCESS) {
-		this->TransmitPacket(this, NULL, 0);
-	} else {
-		this->TransmitStall(this);
-		this->ReceivePacket(this, this->rxBufferLen);
-	}
-	return;
-}
-
 static void EPContol_SetupStage(USB_EP* this)
 {
 	if (!this) {
@@ -34,18 +23,18 @@ static void EPContol_SetupStage(USB_EP* this)
 
             txData[0] = devDesc.bLength;
             txData[1] = devDesc.bDescriptorType;
-            txData[2] = devDesc.bcdUSB >> 8;
-            txData[3] = devDesc.bcdUSB;
+            txData[2] = devDesc.bcdUSB;
+            txData[3] = devDesc.bcdUSB >> 8;
             txData[4] = devDesc.bDeviceClass;
             txData[5] = devDesc.bDeviceSubClass;
             txData[6] = devDesc.bDeviceProtocol;
             txData[7] = devDesc.bMaxPacketSize0;
-            txData[8] = devDesc.idVendor >> 8;
-            txData[9] = devDesc.idVendor;
-            txData[10] = devDesc.idProduct >> 8;
-            txData[11] = devDesc.idProduct;
-            txData[12] = devDesc.bcdDevice >> 8;
-            txData[13] = devDesc.bcdDevice;
+            txData[8] = devDesc.idVendor;
+            txData[9] = devDesc.idVendor >> 8;
+            txData[10] = devDesc.idProduct;
+            txData[11] = devDesc.idProduct >> 8;
+            txData[12] = devDesc.bcdDevice;
+            txData[13] = devDesc.bcdDevice >> 8;
             txData[14] = devDesc.iManufacturer;
             txData[15] = devDesc.iProduct;
             txData[16] = devDesc.iSerialNumber;
@@ -56,10 +45,8 @@ static void EPContol_SetupStage(USB_EP* this)
     }
 
 	if (req->bmRequestType == 0x00 && req->bRequest == SET_ADDRESS) {
-		__BKPT();
-
 		this->address = (uint8_t)(req->wValue & 0x7F);
-		EPControl_SendStatus(this, SUCCESS);
+		this->SendStatus(this, SUCCESS);
 	}
 }
 
@@ -67,32 +54,21 @@ void EPControl_StatusStage(USB_EP* this)
 {
 	if (this->address) {
 		USB_SETADDRESS(this->address);
-		__BKPT();
-
 		this->address = 0;
 	}
-	this->ReceivePacket(this, this->rxBufferLen);
+	/* this->ReceivePacket(this, this->rxBufferLen); */
 }
 
 void EPControl_OnReceive(USB_EP* this)
 {
-	__BKPT();
-
     if (!this) {
         return;
 	}
 
-	uint_fast8_t isSetup = this->epr && USB_EP_SETUP;
-	
-	__BKPT();
+	uint16_t isSetup = *(this->epr) & USB_EP_SETUP;
 
-	if (isSetup) {
-		EPContol_SetupStage(this);
-	} else {
-		__BKPT();
-
-		EPControl_StatusStage(this);
-	}
+	EPControl_StatusStage(this);
+	EPContol_SetupStage(this);
 }
 
 void EPControl_OnReset(USB_EP* this)

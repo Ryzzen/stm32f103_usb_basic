@@ -30,6 +30,7 @@ typedef struct USB_EP_s {
 	void (*OnTransmit)(struct USB_EP_s* this);
 	void (*OnReceive)(struct USB_EP_s* this);
 	void (*OnReset)(struct USB_EP_s* this);
+	void (*SendStatus)(struct USB_EP_s* this, ErrorStatus status);
 
 	uint16_t*  	epr;
 	uint8_t    	eprNb;
@@ -41,6 +42,8 @@ typedef struct USB_EP_s {
 	UsbMem_t*  rxBuffer;
 	size_t     rxBufferLen;
 	USB_EpType type;
+
+	uint_fast8_t error;
 } USB_EP;
 
 USB_EP USB_EP_Constructor(	uint8_t eprNb,

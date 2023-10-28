@@ -54,6 +54,7 @@ typedef enum USB_bRequest_e {
 
 // Descriptor type from wValue word of devRequest
 typedef enum USB_bDescType_e {
+	UNKNOWNED,
 	DEVICE,
 	CONFIGURATION,
 	STRING,
@@ -61,7 +62,8 @@ typedef enum USB_bDescType_e {
 	ENDPOINT,
 	DEVICE_QUALIFIER,
 	OTHER_SPEED_CONFIGURATION,
-	INTERFACE_POWER
+	INTERFACE_POWER,
+	OTG
 } USB_bDescType ;
 
 #ifdef __cplusplus

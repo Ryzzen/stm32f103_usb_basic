@@ -74,10 +74,16 @@ void EPn_ReceivePacket(USB_EP* this, size_t length)
 
 void EPn_OnTransmit(USB_EP* this)
 {
-    if (!this)
+    if (!this) {
         return;
+	}
 
-    EPn_ReceivePacket(this, this->rxBufferLen);
+	if (this->error) {
+		this->error = 0;
+		this->SendStatus(this, ERROR);
+	} else {
+	    EPn_ReceivePacket(this, this->rxBufferLen);
+	}
 }
 
 void EPn_OnReceive(USB_EP* this)
@@ -97,6 +103,17 @@ void EPn_ReadBuffer(USB_EP* this, uint8_t* buffer, size_t length)
 
      for (uint_fast32_t i = 0; (i < length) && (i < this->rxBufferLen) ; i++)
         buffer[i] = USBMEM_BYTE(this->rxBuffer, i);
+}
+
+void  EPn_SendStatus(USB_EP* this, ErrorStatus status)
+{
+	if (status == SUCCESS) {
+		this->TransmitPacket(this, NULL, 0);
+	} else {
+		this->TransmitStall(this);
+		this->ReceivePacket(this, this->rxBufferLen);
+	}
+	return;
 }
 
 void Specialize(USB_EP* base)
@@ -127,6 +144,7 @@ USB_EP USB_EP_Constructor(  uint8_t eprNb,
         &EPn_OnTransmit,
         &EPn_OnReceive,
         &EPn_OnReset,
+        &EPn_SendStatus,
         (uint16_t*)(USBMEM_BYTE_ADR(EPnR, (eprNb * 2))),
         eprNb,
         &(BufDescTable[eprNb]),
@@ -135,7 +153,8 @@ USB_EP USB_EP_Constructor(  uint8_t eprNb,
         USB_EP_BUFSIZE,
         rxBuffer,
         USB_EP_BUFSIZE,
-        type
+        type,
+		0
     };
     
     Specialize(&result);

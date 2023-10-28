@@ -5,12 +5,12 @@
 extern "C" {
 #endif
 
-typedef enum USB_EpControlStage_e {
-	STANDBY,
-	HANDSHAKE,
-	RECV_SETUP,
-	SEND_SETUP
-} USB_EpControlStage;
+typedef enum USB_Enumeration_e {
+	FIRST_DESCRIPTOR_STAGE,
+	ADDRESS_STAGE,
+	SECOND_DESCRIPTOR_STAGE,
+	CONFIGURATION_DESCRIPTOR_STAGE
+} USB_Enumeration;
 
 #ifdef __cplusplus
 }
